@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Bondhu AI - বন্ধু এআই</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="chat-container">
+    <!-- হেডার -->
+    <header class="chat-header">
+      <div class="header-info">
+        <div class="avatar-glow">
+          <div class="bot-avatar">🤖</div>
+        </div>
+        <div>
+          <h1>Bondhu AI <span class="badge">বন্ধু</span></h1>
+          <p class="status-text"><span class="dot"></span> অনলাইন আছেন (বাংলা ও English)</p>
+        </div>
+      </div>
+      <button id="clearBtn" class="icon-btn" title="চ্যাট মুছুন">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- চ্যাট বডি -->
+    <main id="chatMessages" class="chat-messages">
+      <!-- স্বাগতম মেসেজ -->
+      <div class="message bot-msg">
+        <div class="msg-bubble">
+          👋 <strong>নমস্কার / Hello!</strong> আমি <strong>Bondhu AI</strong>।<br>
+          আপনার পড়াশোনা, কোডিং, দৈনন্দিন যেকোনো প্রশ্ন বা আড্ডা দিতে পারেন বাংলায় অথবা ইংরেজিতে। বলুন, আজ আপনাকে কীভাবে সাহায্য করতে পারি?
+        </div>
+        <span class="msg-time">এইমাত্র</span>
+      </div>
+    </main>
+
+    <!-- লোডিং ইন্ডিকেটর -->
+    <div id="typingIndicator" class="typing-indicator hidden">
+      <span></span>
+      <span></span>
+      <span></span>
+      <p class="typing-text">বন্ধু ভাবছে...</p>
+    </div>
+
+    <!-- এরর মেসেজ বক্স -->
+    <div id="errorToast" class="error-toast hidden"></div>
+
+    <!-- ইনপুট বার -->
+    <footer class="chat-input-area">
+      <form id="chatForm">
+        <textarea 
+          id="userInput" 
+          rows="1" 
+          placeholder="বাংলা বা ইংরেজিতে কিছু লিখুন... (Type a message)" 
+          required
+        ></textarea>
+        <button type="submit" id="sendBtn" class="send-btn" aria-label="Send">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
