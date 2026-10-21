@@ -1,5 +1,7 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from openai import OpenAI
 import os
 
 app = Flask(__name__)
@@ -17,10 +19,23 @@ def chat():
     if not message:
         return jsonify({"error": "Please enter a message"}), 400
 
-    return jsonify({
-        "reply": "তোমার মেসেজ পেয়েছি: " + message +
-                 ". আসল AI সংযোগ এখনো সেটআপ করতে হবে।"
-    })
+    try:
+        client = OpenAI(
+            api_key=os.environ.get("OPENAI_API_KEY")
+        )
+
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            input=message
+        )
+
+        return jsonify({"reply": response.output_text})
+
+    except Exception:
+        app.logger.exception("AI request failed")
+        return jsonify({
+            "error": "AI response failed. Please check server settings."
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
