@@ -32,11 +32,13 @@
       }
 
       chat.textContent = "You: " + message + "\n\nConnecting to server...";
-      try {
-        const response = await fetch(
-          ","https://my-ai-app-backend-f9sx.onrender.com/chat",
-{
-          {
+      
+        
+          try {
+  const response = await fetch(
+    "https://my-ai-app-backend-f9sx.onrender.com/chat",
+    {
+  
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message })
