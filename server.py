@@ -1,8 +1,8 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from openai import OpenAI
 import os
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -19,23 +19,51 @@ def chat():
     if not message:
         return jsonify({"error": "Please enter a message"}), 400
 
+    api_key = os.environ.get("GEMINI_API_KEY")
+
+    if not api_key:
+        return jsonify({"error": "GEMINI_API_KEY is missing"}), 500
+
     try:
-        client = OpenAI(
-            api_key=os.environ.get("OPENAI_API_KEY")
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/"
+            "models/gemini-2.5-flash:generateContent"
         )
 
-        response = client.responses.create(
-            model="gpt-4.1-mini",
-            input=message
+        response = requests.post(
+            url,
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": api_key
+            },
+            json={
+                "contents": [
+                    {"parts": [{"text": message}]}
+                ]
+            },
+            timeout=30
         )
 
-        return jsonify({"reply": response.output_text})
+        result = response.json()
+
+        if response.status_code != 200:
+            app.logger.error("Gemini API error: %s", response.status_code)
+            return jsonify({
+                "error": "Gemini could not respond. Check API access and server logs."
+            }), 500
+
+        reply = (
+            result.get("candidates", [{}])[0]
+            .get("content", {})
+            .get("parts", [{}])[0]
+            .get("text", "No reply received.")
+        )
+
+        return jsonify({"reply": reply})
 
     except Exception:
-        app.logger.exception("AI request failed")
-        return jsonify({
-            "error": "AI response failed. Please check server settings."
-        }), 500
+        app.logger.exception("Gemini request failed")
+        return jsonify({"error": "Could not connect to Gemini"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
