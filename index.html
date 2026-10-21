@@ -5,6 +5,78 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My AI App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4ff;
+      margin: 0;
+      padding: 20px;
+    }
+    .app {
+      max-width: 500px;
+      margin: 40px auto;
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px #0001;
+    }
+    h1 { color: #3156d9; }
+    #chat {
+      min-height: 150px;
+      padding: 12px;
+      background: #f7f8fc;
+      border-radius: 10px;
+      white-space: pre-wrap;
+    }
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 8px;
+      background: #3156d9;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>My AI App 🤖</h1>
+    <p>Welcome! Ask me anything.</p>
+    <div id="chat">Hello! Welcome to My AI App.</div>
+    <input id="question" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+  <script>
+    function sendMessage() {
+      const input = document.getElementById("question");
+      const chat = document.getElementById("chat");
+      const message = input.value.trim();
+      if (!message) {
+        chat.textContent = "Please type a message first.";
+        return;
+      }
+      chat.textContent = "You: " + message +
+        "\n\nThis demo is working! To get AI answers, an AI API needs to be connected.";
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My AI App</title>
 </head>
 <body>
   <h1>My AI App</h1>
