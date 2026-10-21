@@ -1,25 +1,27 @@
-
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def home():
+    return jsonify({"message": "My AI server is running!"})
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json(silent=True) or {}
+    message = data.get("message", "").strip()
+
+    if not message:
+        return jsonify({"error": "Please enter a message"}), 400
+
     return jsonify({
-        "message": "My AI server is running!"
+        "reply": "তোমার মেসেজ পেয়েছি: " + message +
+                 ". আসল AI সংযোগ এখনো সেটআপ করতে হবে।"
     })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()        self.wfile.write(json.dumps({
-            "message": "My AI server is running!"
-        }).encode())
-
-server = HTTPServer(("0.0.0.0", 8000), Handler)
-server.serve_forever()
