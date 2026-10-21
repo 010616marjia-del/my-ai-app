@@ -44,11 +44,12 @@
             body: JSON.stringify({ message })
           }
         );
+        
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Server error");
         chat.textContent = "You: " + message + "\n\nAI: " + data.reply;
       } catch (error) {
-        chat.textContent = "Could not connect to the AI server yet. The server's /chat endpoint still needs to be set up.";
+        chat.textContent = "Error: " + error.message;
       }
       input.value = "";
     }
