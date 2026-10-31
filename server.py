@@ -2,14 +2,16 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-import requests
 
 app = Flask(__name__)
 CORS(app)
 
 @app.route("/")
 def home():
-    return jsonify({"message": "My AI server is running!"})
+    return jsonify({
+        "message": "My AI server is running!",
+        "mode": "DEMO"
+    })
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -19,51 +21,46 @@ def chat():
     if not message:
         return jsonify({"error": "Please enter a message"}), 400
 
-    api_key = os.environ.get("GEMINI_API_KEY")
+    text = message.lower()
 
-    if not api_key:
-        return jsonify({"error": "GEMINI_API_KEY is missing"}), 500
+    # Greeting
+    if any(word in text for word in ["hello", "hi", "হ্যালো", "হাই"]):
+        reply = "Hello! Welcome to My AI App. How can I help you?"
 
-    try:
-        url = (
-            "https://generativelanguage.googleapis.com/v1beta/"
-            "models/gemini-2.5-flash:generateContent"
-        )
+    # Name
+    elif "your name" in text or "তোমার নাম" in text:
+        reply = "My name is My AI Assistant."
 
-        response = requests.post(
-            url,
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": api_key
-            },
-            json={
-                "contents": [
-                    {"parts": [{"text": message}]}
-                ]
-            },
-            timeout=30
-        )
+    # English learning
+    elif "what is a noun" in text or "noun" in text:
+        reply = "A noun is the name of a person, place, animal or thing. Example: Boy, School, Cat, Book."
 
-        result = response.json()
+    elif "what is a verb" in text or "verb" in text:
+        reply = "A verb is an action word. Examples: Run, Eat, Play, Read."
 
-        if response.status_code != 200:
-            app.logger.error("Gemini API error: %s", response.status_code)
-            return jsonify({
-                "error": "Gemini could not respond. Check API access and server logs."
-            }), 500
+    elif "what is a plant" in text or "plant" in text:
+        reply = "A plant is a living thing. Plants need sunlight, water, air and nutrients to grow."
 
+    # Simple maths
+    elif "2+2" in text or "2 + 2" in text:
+        reply = "2 + 2 = 4. Great question!"
+
+    elif "capital of bangladesh" in text:
+        reply = "The capital of Bangladesh is Dhaka."
+
+    # Default response
+    else:
         reply = (
-            result.get("candidates", [{}])[0]
-            .get("content", {})
-            .get("parts", [{}])[0]
-            .get("text", "No reply received.")
+            "Thank you for your question! "
+            "I am currently running in Demo Mode. "
+            "I can answer a few prepared questions. "
+            "Try asking about nouns, verbs, plants or simple maths."
         )
 
-        return jsonify({"reply": reply})
-
-    except Exception:
-        app.logger.exception("Gemini request failed")
-        return jsonify({"error": "Could not connect to Gemini"}), 500
+    return jsonify({
+        "reply": reply,
+        "mode": "DEMO"
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
