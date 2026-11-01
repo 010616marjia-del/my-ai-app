@@ -7,104 +7,266 @@ import re
 app = Flask(__name__)
 CORS(app)
 
+LESSONS = {
+    "english": {
+        "lesson": """CAMBRIDGE STAGE 3 - ENGLISH (ESL)
+
+Topic: Parts of Speech
+
+1. Noun: A naming word.
+Examples: Boy, School, Book.
+
+2. Verb: An action word.
+Examples: Run, Eat, Read.
+
+3. Adjective: A describing word.
+Examples: Beautiful, Tall, Happy.
+
+4. Pronoun: A word used instead of a noun.
+Examples: He, She, It, They.
+
+Now try to make your own sentences!""",
+
+        "practice": """ENGLISH PRACTICE
+
+1. Find the noun: The cat is sleeping.
+2. Find the verb: Birds fly in the sky.
+3. Find the adjective: She has a beautiful flower.
+4. Choose a pronoun for Rahim: He / They.
+
+Write your answers.""",
+
+        "quiz": """ENGLISH QUIZ
+
+1. Which word is a noun?
+A. Run
+B. School
+C. Quickly
+
+2. Which word is a verb?
+A. Jump
+B. Beautiful
+C. Blue
+
+3. Which word is an adjective?
+A. Book
+B. Eat
+C. Happy
+
+Reply: answers: 1B, 2A, 3C""",
+
+        "key": ["B", "A", "C"]
+    },
+
+    "math": {
+        "lesson": """CAMBRIDGE STAGE 3 - MATHEMATICS
+
+Topic: Place Value
+
+Example: 347
+
+3 = 3 Hundreds = 300
+4 = 4 Tens = 40
+7 = 7 Ones = 7
+
+347 = 300 + 40 + 7
+
+Addition means putting together.
+Subtraction means taking away.
+Multiplication means equal groups.
+Division means sharing equally.""",
+
+        "practice": """MATHEMATICS PRACTICE
+
+1. What is the value of 5 in 352?
+2. Calculate: 125 + 34
+3. Calculate: 90 - 25
+4. Calculate: 6 x 4
+5. Calculate: 20 / 5
+
+Try to solve them yourself.""",
+
+        "quiz": """MATHEMATICS QUIZ
+
+1. What is 200 + 30 + 5?
+A. 235
+B. 253
+C. 325
+
+2. What is 8 x 3?
+A. 11
+B. 24
+C. 32
+
+3. What is 40 / 5?
+A. 5
+B. 6
+C. 8
+
+Reply: answers: 1A, 2B, 3C""",
+
+        "key": ["A", "B", "C"]
+    },
+
+    "science": {
+        "lesson": """CAMBRIDGE STAGE 3 - SCIENCE
+
+Topic: Plants
+
+Plants are living things.
+
+Plants need:
+1. Sunlight
+2. Water
+3. Air
+4. Nutrients from the soil
+
+Roots take in water.
+The stem supports the plant.
+Leaves help plants make food.
+
+Plants provide food and oxygen.""",
+
+        "practice": """SCIENCE PRACTICE
+
+1. What do plants need to grow?
+2. Which part takes in water?
+3. Which part supports the plant?
+4. Why are plants important?
+
+Answer in simple sentences.""",
+
+        "quiz": """SCIENCE QUIZ
+
+1. Which part takes in water?
+A. Flower
+B. Root
+C. Fruit
+
+2. What do plants need to grow?
+A. Water
+B. Plastic
+C. Glass
+
+3. Which is a living thing?
+A. Stone
+B. Chair
+C. Tree
+
+Reply: answers: 1B, 2A, 3C""",
+
+        "key": ["B", "A", "C"]
+    }
+}
+
+
+def find_subject(text):
+    if "english" in text:
+        return "english"
+    if "math" in text or "গণিত" in text:
+        return "math"
+    if "science" in text or "বিজ্ঞান" in text:
+        return "science"
+    return None
+
+
+def check_answers(text, subject):
+    match = re.search(
+        r"1\s*([ABC])\s*[, ]+\s*2\s*([ABC])\s*[, ]+\s*3\s*([ABC])",
+        text.upper()
+    )
+
+    if not match:
+        return "Please write: answers: 1B, 2A, 3C"
+
+    user_answers = list(match.groups())
+    correct_answers = LESSONS[subject]["key"]
+
+    score = sum(
+        1 for user, correct in zip(user_answers, correct_answers)
+        if user == correct
+    )
+
+    result = f"Your score: {score}/3\n\n"
+
+    for i, (user, correct) in enumerate(
+        zip(user_answers, correct_answers), start=1
+    ):
+        if user == correct:
+            result += f"Question {i}: Correct!\n"
+        else:
+            result += f"Question {i}: Incorrect. Correct answer: {correct}\n"
+
+    if score == 3:
+        result += "\nExcellent work! All answers are correct!"
+    elif score == 2:
+        result += "\nGood effort! Keep practising!"
+    else:
+        result += "\nKeep learning. Try again!"
+
+    return result
+
+
 @app.route("/")
 def home():
     return jsonify({
-        "message": "My AI server is running!",
+        "message": "My Cambridge Learning App is running!",
         "mode": "DEMO",
-        "subjects": ["English", "Math", "Science"]
+        "subjects": ["English (ESL)", "Mathematics", "Science"],
+        "features": ["Lesson", "Practice", "Quiz"]
     })
 
 
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json(silent=True) or {}
-    message = data.get("message", "").strip()
+    message = data.get("message", "")
 
-    if not message:
+    if not isinstance(message, str) or not message.strip():
         return jsonify({"error": "Please enter a message"}), 400
 
-    text = message.lower()
+    text = message.lower().strip()
+    subject = find_subject(text)
 
-    # Greetings
-    if any(word in text for word in ["hello", "hi", "হ্যালো", "হাই"]):
-        reply = "Hello! Welcome to My AI Learning App!"
+    if subject:
 
-    # English
-    elif "noun" in text:
-        reply = "A noun is the name of a person, place, animal or thing. Example: Boy, School, Cat, Book."
+        if "answer" in text or "answers" in text:
+            reply = check_answers(text, subject)
 
-    elif "verb" in text:
-        reply = "A verb is an action word. Examples: Run, Eat, Play, Read."
+        elif "quiz" in text or "কুইজ" in text:
+            reply = LESSONS[subject]["quiz"]
 
-    elif "adjective" in text:
-        reply = "An adjective describes a noun. Examples: Beautiful, Big, Small, Happy."
+        elif "practice" in text or "প্র্যাকটিস" in text:
+            reply = LESSONS[subject]["practice"]
 
-    elif "pronoun" in text:
-        reply = "A pronoun is a word used instead of a noun. Examples: He, She, It, They."
+        elif "lesson" in text or "পাঠ" in text:
+            reply = LESSONS[subject]["lesson"]
 
-    elif "vowel" in text:
-        reply = "The five vowels are A, E, I, O, U."
-
-    elif "plural" in text:
-        reply = "Plural means more than one. Example: Cat becomes Cats."
-
-    # Mathematics
-    elif re.search(r"\d+\s*[+]\s*\d+", text):
-        match = re.search(r"(\d+)\s*\+\s*(\d+)", text)
-        reply = f"The answer is {int(match.group(1)) + int(match.group(2))}."
-
-    elif re.search(r"\d+\s*[-]\s*\d+", text):
-        match = re.search(r"(\d+)\s*-\s*(\d+)", text)
-        reply = f"The answer is {int(match.group(1)) - int(match.group(2))}."
-
-    elif re.search(r"\d+\s*[*x]\s*\d+", text):
-        match = re.search(r"(\d+)\s*[*x]\s*(\d+)", text)
-        reply = f"The answer is {int(match.group(1)) * int(match.group(2))}."
-
-    elif re.search(r"\d+\s*/\s*\d+", text):
-        match = re.search(r"(\d+)\s*/\s*(\d+)", text)
-        a, b = int(match.group(1)), int(match.group(2))
-        if b == 0:
-            reply = "Division by zero is not possible."
         else:
-            reply = f"The answer is {a / b:g}."
+            reply = (
+                f"Welcome to {subject.title()}!\n\n"
+                "Type:\n"
+                f"{subject.title()}: lesson\n"
+                f"{subject.title()}: practice\n"
+                f"{subject.title()}: quiz"
+            )
 
-    # Science
-    elif "plant" in text:
-        reply = "Plants are living things. They need sunlight, water, air and nutrients to grow."
-
-    elif "animal" in text:
-        reply = "Animals are living things. They need food, water and air to live."
-
-    elif "water" in text:
-        reply = "Water is essential for life. Humans, animals and plants need water."
-
-    elif "sun" in text:
-        reply = "The Sun is a star. It gives Earth light and heat."
-
-    elif "human body" in text:
-        reply = "The human body has many parts. The heart pumps blood and the brain controls the body."
-
-    elif "butterfly" in text:
-        reply = "A butterfly has four life cycle stages: Egg → Caterpillar → Pupa → Adult butterfly."
-
-    elif "earth" in text:
-        reply = "Earth is the planet where we live. It is our home."
+    elif any(word in text for word in ["hello", "hi", "হ্যালো", "হাই"]):
+        reply = "Hello! Welcome to My Cambridge Learning App!"
 
     else:
         reply = (
-            "Welcome to My AI Learning App!\n"
-            "I can answer some prepared questions in three subjects:\n"
-            "English: noun, verb, adjective, pronoun, vowel.\n"
-            "Math: Try 25 + 15, 20 - 5, 6 * 4 or 12 / 3.\n"
-            "Science: plants, animals, water, sun, Earth.\n"
-            "Try asking me a question!"
+            "Welcome to My Cambridge Learning App!\n\n"
+            "Choose a subject:\n\n"
+            "English: lesson / practice / quiz\n"
+            "Math: lesson / practice / quiz\n"
+            "Science: lesson / practice / quiz"
         )
 
     return jsonify({
         "reply": reply,
-        "mode": "DEMO"
+        "mode": "DEMO",
+        "subject": subject
     })
 
 
