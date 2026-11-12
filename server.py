@@ -211,10 +211,10 @@ def check_answers(text, subject):
 def home():
     return jsonify({
         "message": "My Cambridge Learning App is running!",
-        "mode": "DEMO",
+        ,
         "subjects": ["English (ESL)", "Mathematics", "Science"],
         "features": ["Lesson", "Practice", "Quiz"]
-    })
+    })MODE = "FREE_LEARNING"
 
 
 @app.route("/chat", methods=["POST"])
