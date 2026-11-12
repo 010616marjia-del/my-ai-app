@@ -170,42 +170,53 @@ def find_subject(text):
     return None
 
 
-def check_answers(text, subject):
-    match = re.search(
-        r"1\s*([ABC])\s*[, ]+\s*2\s*([ABC])\s*[, ]+\s*3\s*([ABC])",
-        text.upper()
-    )
 
-    if not match:
-        return "Please write: answers: 1B, 2A, 3C"
 
-    user_answers = list(match.groups())
-    correct_answers = LESSONS[subject]["key"]
 
-    score = sum(
-        1 for user, correct in zip(user_answers, correct_answers)
-        if user == correct
-    )
+def check_practice_answers(text, subject):
+    answer_keys = {
+        "english": {
+            "1": ["cat"],
+            "2": ["fly"],
+            "3": ["beautiful"],
+            "4": ["he"]
+        },
+        "math": {
+            "1": ["50"],
+            "2": ["159"],
+            "3": ["65"],
+            "4": ["24"],
+            "5": ["4"]
+        },
+        "science": {
+            "1": ["sunlight", "water", "air", "nutrients"],
+            "2": ["root"],
+            "3": ["stem"],
+            "4": ["food", "oxygen"]
+        }
+    }
 
-    result = f"Your score: {score}/3\n\n"
+    if subject not in answer_keys:
+        return "Subject not found."
 
-    for i, (user, correct) in enumerate(
-        zip(user_answers, correct_answers), start=1
-    ):
-        if user == correct:
-            result += f"Question {i}: Correct!\n"
+    keys = answer_keys[subject]
+    result = subject.upper() + " PRACTICE RESULTS\n\n"
+
+    for number, keywords in keys.items():
+        pattern = rf"(?:^|[,;\n])\s*{number}\s*[.)-]?\s*(.*?)(?=(?:[,;\n]\s*[1-5]\s*[.)-]?)|$)"
+        match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+
+        if match:
+            user_answer = match.group(1).strip().lower()
+
+            if any(word in user_answer for word in keywords):
+                result += f"Question {number}: Correct!\n"
+            else:
+                result += f"Question {number}: Try again!\n"
         else:
-            result += f"Question {i}: Incorrect. Correct answer: {correct}\n"
-
-    if score == 3:
-        result += "\nExcellent work! All answers are correct!"
-    elif score == 2:
-        result += "\nGood effort! Keep practising!"
-    else:
-        result += "\nKeep learning. Try again!"
+            result += f"Question {number}: Not answered.\n"
 
     return result
-
 
 
 MODE = "FREE_LEARNING"
